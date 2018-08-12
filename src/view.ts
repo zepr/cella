@@ -9,7 +9,9 @@ export class MenuSprite extends Zepr.Sprite {
     /** Single generation */
     private run: boolean;
 
-    constructor(protected menuImage: HTMLImageElement, protected menuPause: HTMLImageElement, protected menuGen: HTMLImageElement) {
+    constructor(protected menuImage: HTMLImageElement, 
+        protected menuPause: HTMLImageElement, 
+        protected menuGen: HTMLImageElement) {
         super(new Zepr.Rectangle(416, 136, 48, 240), 1);
     }
 
@@ -37,7 +39,9 @@ export class MenuSprite extends Zepr.Sprite {
 export class GridSprite extends Zepr.Sprite {
 
     public static readonly COLORS: Array<string> = [
-        null, '#53777A', '#542437', '#C02942', '#D95B43', '#ECD078', '#B5E86F', '#D827B5', '#1C9CCE'
+        null, // No value for first index (empty)
+        '#53777A', '#542437', '#C02942', '#D95B43', 
+        '#ECD078', '#B5E86F', '#D827B5', '#1C9CCE'
     ];
 
     private zoom: number;
@@ -82,22 +86,23 @@ export class GridSprite extends Zepr.Sprite {
      * Return the cell index of a point on screen
      */
     public getPosition = (point: Zepr.Point): Array<number> => {
-        return <Array<number>>[
-            Math.floor((point.x - this.origin.x) / this.zoom),
-            Math.floor((point.y - this.origin.y) / this.zoom)
-        ];
+        let x: number = this.normalize(Math.floor((point.x - this.origin.x) / this.zoom));
+        let y: number = this.normalize(Math.floor((point.y - this.origin.y) / this.zoom));
+
+        return <Array<number>>[x, y];
+    }
+
+    /**
+     * Normalize value for looping [0 - 511] index
+     */
+    public normalize = (idx: number): number => {
+        idx %= 512;
+        if (idx < 0) idx += 512;
+        return idx;
     }
 
     public drag = (delta: Zepr.Vector): void => {
         this.origin.addVector(delta);
-
-        // Enforce limits
-        if (this.origin.x > 0) this.origin.set(0, this.origin.y);
-        if (this.origin.y > 0) this.origin.set(this.origin.x, 0);
-        let min: number = 512 * (1 - this.zoom);
-        if (this.origin.x < min) this.origin.set(min, this.origin.y);
-        if (this.origin.y < min) this.origin.set(this.origin.x, min);
-
         this.needUpdate = true;
     }
 
@@ -129,8 +134,50 @@ export class GridSprite extends Zepr.Sprite {
 
     repaint(context: CanvasRenderingContext2D): void {
 
-        context.clearRect(0, 0, 512, 512);
+        context.clearRect(0, 0, 512, 512);        
 
+        // DRAW CELLS
+
+        // Viewable dots
+        let minX: number = Math.floor(-this.origin.x / this.zoom);
+        let minY: number = Math.floor(-this.origin.y / this.zoom);
+        let dim: number = Math.ceil(512 / this.zoom);
+
+        // Start point (gfx)
+        let startX: number = this.origin.x + minX * this.zoom;
+        let startY: number = this.origin.y + minY * this.zoom;
+
+        // Current position (gfx)
+        let currentX: number;
+        let currentY: number = startY;
+
+        // Start point (cell coords)
+        let firstCellX: number = this.normalize(minX);
+        let y: number = this.normalize(minY);
+        let x: number;
+
+        for (let j: number = 0; j <= dim; j++) {           
+
+            currentX = startX;
+            x = firstCellX;
+
+            for (let i: number = 0; i <= dim; i++) {
+
+                if (this.grid[x][y] > 0) {
+                    context.fillStyle = GridSprite.COLORS[this.grid[x][y]];
+                    //context.fillStyle = GridSprite.COLORS[((x + y) % 8) + 1];
+                    context.fillRect(currentX, currentY, this.zoom, this.zoom);
+                }
+                currentX += this.zoom;
+                x++;
+                if (x == 512) x = 0;
+            }
+            currentY += this.zoom;
+            y++;
+            if (y == 512) y = 0;
+        }
+
+        // DRAW GRID
         // Grid
         if (this.zoom > 4) {
             if (this.zoom > 8) {
@@ -140,49 +187,22 @@ export class GridSprite extends Zepr.Sprite {
                 context.strokeStyle = '#' + value + value + value;
             }
 
-            for (let i = this.origin.y; i < 512; i += this.zoom) {
-                context.beginPath();
-                context.moveTo(this.origin.x, i);
-                context.lineTo(512, i);
-                context.stroke();
-            }
-
-            for (let i = this.origin.x; i < 512; i += this.zoom) {
-                context.beginPath();
-                context.moveTo(i, this.origin.y);
-                context.lineTo(i, 512);
-                context.stroke();
-            }
-        }
-        
-
-        // Viewable dots
-        let minX: number = Math.floor(-this.origin.x / this.zoom);
-        let maxX: number = Math.min(511, Math.ceil(minX + 512 / this.zoom));
-        let minY: number = Math.floor(-this.origin.y / this.zoom);
-        let maxY: number = Math.min(511, Math.ceil(minY + 512 / this.zoom));
-
-        // Start point
-        let startX: number = this.origin.x + minX * this.zoom;
-        let startY: number = this.origin.y + minY * this.zoom;
-
-        // Current position
-        let currentX: number;
-        let currentY: number = startY;
-
-        for (let y: number = minY; y <= maxY; y++) {
-
             currentX = startX;
+            currentY = startY;
+            for (let i = 0; i <= dim; i++) {
+                context.beginPath();
+                context.moveTo(0, currentY);
+                context.lineTo(512, currentY);
+                context.stroke();
 
-            for (let x: number = minX; x <= maxX; x++) {
-                if (this.grid[x][y] > 0) {
-                    context.fillStyle = GridSprite.COLORS[this.grid[x][y]];
-                    //context.fillStyle = GridSprite.COLORS[((x + y) % 8) + 1];
-                    context.fillRect(currentX, currentY, this.zoom, this.zoom);
-                }
+                context.beginPath();
+                context.moveTo(currentX, 0);
+                context.lineTo(currentX, 512);
+                context.stroke();
+
                 currentX += this.zoom;
+                currentY += this.zoom;
             }
-            currentY += this.zoom;
-        }
+        }        
     }
 }

@@ -36,9 +36,14 @@ webpack
 
 - Utilisation
 
-Les fichiers générés (répertoire ```/dist```) sont directement exploitables.
+Les fichiers générés (répertoire ```/dist```) sont directement exploitables via un serveur web.
 
 ## Changelog
+
+### 0.0.2 - 2018.08.12
+
+- Suppression des "bords" du tore : plus de limitation dans la navigation
+- Corrections mineures
 
 ### 0.0.1 - 2018.07.29
 
