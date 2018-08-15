@@ -106,6 +106,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
     onZoom(engine: Zepr.Engine, ratio: number): void {
         this.gridSprite.setZoom(ratio);
     }
+
     onDrag(engine: Zepr.Engine, move: Zepr.Vector): void {
         if (this.clickPosition) {
             this.clickMove.addVector(move);
@@ -129,6 +130,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
     }
 
     onDrop(engine: Zepr.Engine): void {
+
         if (this.clickPosition) {
             // Click
             if (this.menuPosition == -1) {
