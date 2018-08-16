@@ -6,6 +6,10 @@
   "scripts": {
     "build": "webpack"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zepr/cella.git"
+  },
   "keywords": [],
   "author": "Glenn Sanson",
   "license": "GPL-3.0-or-later",
@@ -22,6 +26,6 @@
   },
   "dependencies": {
     "npm": "^6.3.0",
-    "zepr.ts": "0.0.6"
+    "zepr.ts": "0.0.7"
   }
 }
