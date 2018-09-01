@@ -4,7 +4,7 @@ import Worker = require('worker-loader!./worker/worker');
 import Types = require('./types');
 
 import { Engine } from './engine';
-import { GridSprite, MenuSprite } from './view';
+import { GridSprite, MenuSprite, ColorPickerSprite } from './view';
 
 class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListener, Zepr.ZoomListener {
 
@@ -12,8 +12,6 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     private gridSprite: GridSprite;
     private menuSprite: MenuSprite;
-
-    //private menuDrag: boolean;
 
     private grid: Array<Array<number>>;
 
@@ -27,7 +25,22 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
     private clickSprites: Array<Zepr.Sprite>;
     private clickMove: Zepr.Vector;
     private menuPosition: number;
-    private gridPosition: Array<number>;
+
+    /** Timeout used for editor */
+    private editTimout: number;
+    private editMode: boolean;
+    private editPosition: Zepr.Point;
+    private editIcon: Zepr.ImageSprite;
+
+    /** Current color used for edit mode */
+    private color: number;
+    /** Colors difined for current cellular automata */
+    private colorsAvailable: number;
+
+    /** Color picker instance */
+    private colorPicker: ColorPickerSprite;
+    /** Check if color picker is visible */
+    private isColorPickerVisible: boolean;
 
     // TODO => Separer constructeur / init
 
@@ -40,24 +53,27 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
         engine.enableZoomControl(1, 40);
         
         this.grid = Engine.getEmptyGrid(512, 512);
-
-        for (let x: number = 0; x < 512; x++) {
-            for (let y: number = 0; y < 512; y++) {
-                this.grid[x][y] = Math.random() > 0.8 ? 1 : 0;
-            }
-        }
-
         this.looping = false;
 
         this.gridSprite = new GridSprite(this.grid);
         engine.addSprite(this.gridSprite);
 
+        this.color = 1; // Default color
+        this.colorsAvailable = 1; // TODO : Change in editor
+        this.colorPicker = new ColorPickerSprite(this.colorsAvailable);
+
         this.menuSprite = new MenuSprite(
             engine.getImage('images/menu.png'),
             engine.getImage('images/menu_pause.png'),
-            engine.getImage('images/menu_gen.png')
+            engine.getImage('images/menu_gen.png'),
+            this.color
         );
         engine.addSprite(this.menuSprite);
+
+        this.editIcon = new Zepr.ImageSprite(
+            engine.getImage('images/edit_mode.png'),
+            new Zepr.Point(0, 0), 10
+        );
 
         // Start worker
         if (this.worker == null) {
@@ -84,6 +100,29 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Array<Zepr.Sprite>): void {
 
+        // Check for click on colorPicker
+        if (this.isColorPickerVisible) {
+            sprites.some((sprite: Zepr.Sprite): boolean => {
+                if (sprite instanceof ColorPickerSprite) {
+                    // Change color
+                    let px: number = point.x - this.colorPicker.getX() - 4;
+                    let py: number = point.y - this.colorPicker.getY() - 4;
+                    if (px >= 0 && px < 90 && py >= 0 && py < 90) {
+                        // Color selected
+                        let newColor: number = Math.floor(py / 30) * 3 + Math.floor(px / 30);
+                        if (newColor <= this.colorsAvailable) {
+                            this.color = newColor;
+                            this.menuSprite.setColor(newColor);
+                        }
+                    }
+
+                    return true;
+                }
+            });
+
+            return;
+        }
+
         this.clickPosition = point;
         this.clickSprites = sprites;
         this.clickMove = new Zepr.Vector();
@@ -94,23 +133,76 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             if (sprite instanceof MenuSprite) {
                 this.menuPosition = Math.floor((this.clickPosition.y - sprite.getY()) / 48);
                 return true;
-            }
+            } 
         });
 
-        if (this.menuPosition == -1) {
-            // Click on grid
-            this.gridPosition = this.gridSprite.getPosition(point);
+        // Check for editMode
+        if (this.menuPosition == -1 && !this.menuSprite.isRunning()) {
+            this.editTimout = setTimeout(this.onEdit, 200, this, engine);
+            this.editPosition = new Zepr.Point(point.x, point.y);
         }
     }
 
+
+    onEdit(scr: GridScreen, engine: Zepr.Engine): void {
+
+        scr.editMode = true;
+        let updatePosition: Array<number> = scr.gridSprite.getPosition(scr.editPosition);
+        if (scr.grid[updatePosition[0]][updatePosition[1]] != scr.color) {
+            scr.grid[updatePosition[0]][updatePosition[1]] = scr.color;
+            scr.gridSprite.updateView();
+        }
+
+        // show edit mode icon
+        engine.addSprite(scr.editIcon);
+    }
+
     onZoom(engine: Zepr.Engine, ratio: number): void {
+
+        if (this.editTimout) {
+            clearTimeout(this.editTimout);
+            this.editTimout = 0;
+        }
+
+        if (this.editMode) {
+            this.editMode = false;
+            engine.removeSprite(this.editIcon);
+        }
+
+        if (this.isColorPickerVisible) {
+            engine.removeSprite(this.colorPicker);
+            this.isColorPickerVisible = false;
+        }
+
         this.gridSprite.setZoom(ratio);
     }
 
     onDrag(engine: Zepr.Engine, move: Zepr.Vector): void {
-        if (this.clickPosition) {
+
+        if (this.isColorPickerVisible) {
+            return;
+        }
+
+        if (this.editMode) {
+            this.editPosition.add(move.x, move.y);
+            let updatePosition: Array<number> = this.gridSprite.getPosition(this.editPosition);
+
+            if (this.grid[updatePosition[0]][updatePosition[1]] != this.color) {
+                // Update state
+                this.grid[updatePosition[0]][updatePosition[1]] = this.color;
+                this.gridSprite.updateView();
+            }
+
+        } else if (this.clickPosition) {
             this.clickMove.addVector(move);
             if (this.clickMove.getMagnitude() > GridScreen.MAX_DISTANCE_MOVE) {
+
+                // Disable edit mode if not yet enabled
+                if (this.editTimout) {
+                    clearTimeout(this.editTimout);
+                    this.editTimout = 0;
+                }        
+
                 // Drag
                 if (this.menuPosition >= 0) {
                     this.menuSprite.move(this.clickMove.x, this.clickMove.y);
@@ -131,50 +223,77 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     onDrop(engine: Zepr.Engine): void {
 
-        if (this.clickPosition) {
-            // Click
-            if (this.menuPosition == -1) {
-                // On grid
-                if (!this.looping) {
-                    // TODO : Temp
-                    this.grid[this.gridPosition[0]][this.gridPosition[1]] = 1 - this.grid[this.gridPosition[0]][this.gridPosition[1]];
-                    this.gridSprite.updateView();
-                }
-            } else {
-                // On menu
-                let message: Types.Message;
-                switch (this.menuPosition) {
-                    case 0:
-                        // Start/stop loop
-                        if (this.looping) {
-                            message = new Types.Message(Types.WorkerCommand.Stop);
+        if (this.isColorPickerVisible) {
+            engine.removeSprite(this.colorPicker);
+            this.isColorPickerVisible = false;
+        }
+
+        if (this.editTimout) {
+            clearTimeout(this.editTimout);
+            this.editTimout = 0;
+        }
+
+        if (this.editMode) {
+            this.editMode = false;
+            engine.removeSprite(this.editIcon);
+        }
+
+        if (this.clickPosition && this.menuPosition != -1) {
+            // Click on menu
+            let message: Types.Message;
+            switch (this.menuPosition) {
+                case 0:
+                    // Start/stop loop
+                    if (this.looping) {
+                        message = new Types.Message(Types.WorkerCommand.Stop);
+                    } else {
+                        message = new Types.Message(Types.WorkerCommand.Loop, this.grid);
+                    }
+                    this.looping = !this.looping;
+                    this.menuSprite.setLooping(this.looping);
+                    this.worker.postMessage(message);
+                break;
+                case 1:
+                    // Next gen
+                    message = new Types.Message(Types.WorkerCommand.Start, this.grid);
+                    this.looping = false;
+                    this.menuSprite.setRunning(true);
+                    this.worker.postMessage(message);
+                break;
+                case 2:
+                    // Color selector
+                    if (this.colorsAvailable == 1) {
+                        this.color = 1 - this.color;
+                        this.menuSprite.setColor(this.color);
+                    } else {
+                        // Set position of colorPicker
+                        let y: number = Math.max(20, Math.min(394, this.menuSprite.getY() + 71));
+                        let x: number;                        
+
+                        if (this.menuSprite.getX() >= 256) {
+                            // Show left
+                            x = this.menuSprite.getX() - 118;
                         } else {
-                            message = new Types.Message(Types.WorkerCommand.Loop, this.grid);
+                            // Show right
+                            x = this.menuSprite.getX() + 68;
                         }
-                        this.looping = !this.looping;
-                        this.menuSprite.setLooping(this.looping);
-                        this.worker.postMessage(message);
-                    break;
-                    case 1:
-                        // Next gen
-                        message = new Types.Message(Types.WorkerCommand.Start, this.grid);
-                        this.looping = false;
-                        this.menuSprite.setRunning(true);
-                        this.worker.postMessage(message);
-                    break;
-                    case 2:
-                        // Rule editor
-                    break;
-                    case 3:
-                        // Load/Save
-                    break;
-                    case 4:
-                        // Reload
-                    break;
-                    default:
-                        // WTF?
-                } 
-            }
+
+                        this.colorPicker.moveTo(x, y);
+
+                        engine.addSprite(this.colorPicker);
+                        this.isColorPickerVisible = true;
+                        this.menuPosition = -1;
+                    }
+                break;
+                case 3:
+                    // Load/Save
+                break;
+                case 4:
+                    // Rule editor
+                break;
+                default:
+                    // WTF?
+            } 
         }
     }
 }

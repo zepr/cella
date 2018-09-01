@@ -2,6 +2,80 @@ import Zepr = require('zepr.ts');
 
 
 
+
+export class ColorPickerSprite extends Zepr.Sprite {
+
+    /** Canvas used for off-screen rendering (double buffering) */
+    private offCanvas: HTMLCanvasElement;
+    /** off-screen Canvas rendering context */
+    private offCtx: CanvasRenderingContext2D;
+
+    constructor(protected nbColors: number) {
+        super(new Zepr.Rectangle(0, 0, 98, 98), 1);
+
+        this.offCanvas = document.createElement<'canvas'>('canvas');
+        this.offCanvas.width = 512;
+        this.offCanvas.height = 512;
+        this.offCtx = this.offCanvas.getContext('2d');
+
+        this.update();
+    }
+
+    setColors(newValue: number): void {
+        this.nbColors = newValue;
+        this.update();
+    }
+
+    update(): void {
+
+        // Background
+        this.offCtx.fillStyle = 'white';
+        this.offCtx.fillRect(0, 0, 98, 98);
+
+        // Colors
+        let px: number = 4;
+        let py: number = 4;
+
+        for (let i: number = 0; i < 9; i++) { // TODO: pour tests
+            
+            if (i > 0) {
+                if (i <= this.nbColors) {
+                    this.offCtx.fillStyle = GridSprite.COLORS[i];
+                    this.offCtx.fillRect(px, py, 30, 30);
+                } else {
+                    this.offCtx.strokeStyle = GridSprite.COLORS[i];
+                    this.offCtx.lineWidth=8;
+                    this.offCtx.beginPath();
+                    this.offCtx.moveTo(px + 6, py + 6);
+                    this.offCtx.lineTo(px + 24, py + 24);
+                    this.offCtx.stroke();
+                    this.offCtx.moveTo(px + 6, py + 24);
+                    this.offCtx.lineTo(px + 24, py + 6);
+                    this.offCtx.stroke();
+                }
+            }
+
+            px += 30; 
+            if (px >= 90) {
+                px = 4;
+                py += 30;
+            }
+        }
+
+        // Border
+        this.offCtx.strokeStyle='#C02942';
+        this.offCtx.lineWidth=4;
+        this.offCtx.strokeRect(2, 2, 94, 94);
+    }
+
+
+
+    render(context: CanvasRenderingContext2D): void {
+        context.drawImage(this.offCanvas, this.rect.x, this.rect.y);
+    }
+}
+
+
 export class MenuSprite extends Zepr.Sprite {
 
     /** Continuous generation */
@@ -11,7 +85,9 @@ export class MenuSprite extends Zepr.Sprite {
 
     constructor(protected menuImage: HTMLImageElement, 
         protected menuPause: HTMLImageElement, 
-        protected menuGen: HTMLImageElement) {
+        protected menuGen: HTMLImageElement,
+        protected color: number) {
+        
         super(new Zepr.Rectangle(416, 136, 48, 240), 1);
     }
 
@@ -23,6 +99,21 @@ export class MenuSprite extends Zepr.Sprite {
         if (this.run) {
             context.drawImage(this.menuGen, this.rect.x, this.rect.y + 48);
         }
+
+        // Color
+        context.beginPath();
+        context.arc(this.rect.x + 35, this.rect.y + 131, 6, 0, 2*Math.PI);
+        if (this.color) {
+            context.fillStyle = GridSprite.COLORS[this.color];
+            context.fill();
+        } else {
+            context.strokeStyle = '#000000';
+            context.stroke();
+        }
+    }
+
+    setColor(color: number): void {
+        this.color = color;
     }
 
     setLooping(isLooping: boolean): void {
@@ -32,6 +123,10 @@ export class MenuSprite extends Zepr.Sprite {
     setRunning(isRunning: boolean): void {
         this.run = isRunning;
         if (this.run && this.loop) this.loop = false;
+    }
+
+    isRunning(): boolean {
+        return this.run || this.loop;
     }
 }
 

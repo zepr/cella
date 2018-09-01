@@ -40,6 +40,11 @@ Les fichiers générés (répertoire ```/dist```) sont directement exploitables 
 
 ## Changelog
 
+### 0.0.3 - 2018.09.02
+
+- Mode edition
+- Sélection de couleur (3ème icône dans le menu)
+
 ### 0.0.2 - 2018.08.12
 
 - Suppression des "bords" du tore : plus de limitation dans la navigation
