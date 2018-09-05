@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "npm": "^6.3.0",
-    "zepr.ts": "0.0.7"
+    "zepr.ts": "0.0.8"
   }
 }

@@ -52,6 +52,8 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
         engine.enableMouseDrag();
         engine.enableZoomControl(1, 40);
         
+        engine.setZoom(6);
+
         this.grid = Engine.getEmptyGrid(512, 512);
         this.looping = false;
 
