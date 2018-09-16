@@ -9,7 +9,7 @@ export class Engine {
 
     private rules: Array<Rule>;
 
-    public constructor(private grid: Array<Array<number>>, rawRules: Array<string>) {
+    public constructor(private grid: Array<Array<number>>, rawRules: Array<string>, private colors: number) {
 
         this.rules = new Array<Rule>();
         rawRules.forEach((rule: string):void => {
@@ -97,7 +97,7 @@ export class Engine {
             for (let j = 0; j < this.height; j++) {
                 if (this.check[i][j]) {
                     this.rules.forEach((rule: Rule): void => {
-                        value = rule.eval(i, j, this.grid);
+                        value = rule.eval(i, j, this.grid, this.colors);
                         if (value >= 0) {
                             nextGrid[i][j] = value;
                             // Case marquee pour tour suivant

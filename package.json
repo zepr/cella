@@ -1,6 +1,6 @@
 {
   "name": "cella",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Un automate cellulaire programmable",
   "main": "index.html",
   "scripts": {

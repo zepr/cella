@@ -1,16 +1,40 @@
 enum TargetType {
     Color,
-    NotColor
+    NotColor,
+    Any,
+    Marked,
+    NotMarked
 }
 
 enum OperandType {
     Numeric,
-    Color,
-    NotColor
+    Color, 
+    NotColor, 
+    SameColor,
+    DifferentColor,
+    CountColors,
+    Color12,
+    Color34,
+    Color13,
+    Color23,
+    Color123,
+    Color1234
 }
 
 enum ActionType {
-    Color
+    Color,
+    Mark,
+    ResetMark,
+    NextColor,
+    PreviousColor,
+    CycleNextColor,
+    CyclePreviousColor,
+    CycleNextNotEmpty,
+    CyclePreviousNotEmpty,
+    CancelChange,
+    EraseMarks,
+    FillMost,
+    Random
 }
 
 
@@ -31,15 +55,23 @@ export class Rule {
     private static readonly TARGET_CELL: string = 'abcdefghABCDEFGHVPTwxyzWXYZ';
     private static readonly TARGET_COLOR: string = 'VABCDEFGH';
     private static readonly TARGET_NOT_COLOR: string = 'Pabcdefgh';
+    private static readonly TARGET_MARKED: string = '>WXYZ';
+    private static readonly TARGET_NOT_MARKED: string = '>wxyz';
 
     private targetType: TargetType;
     private targetValue: number;
 
     // Operands [..X.X.]
-    private static readonly OPERAND = '012345678abcdefghABCDEFGHIJKLMNOPQRS';
+    private static readonly OPERAND: string = '012345678abcdefghABCDEFGHIJKLMNOPQRS';
     private static readonly OPERAND_NUMERIC: string = '012345678';
     private static readonly OPERAND_COLOR: string = 'MABCDEFGH';
     private static readonly OPERAND_NOT_COLOR: string = 'Labcdefgh';
+    private static readonly OPERAND_OTHER: string = 'IJKNOPQRS';
+    private static readonly OPERAND_OTHER_TYPE: Array<OperandType> = [
+        OperandType.SameColor, OperandType.DifferentColor, OperandType.CountColors,
+        OperandType.Color12, OperandType.Color34, OperandType.Color13, 
+        OperandType.Color23, OperandType.Color123, OperandType.Color1234    
+    ];
 
     private leftOperandType: OperandType;
     private leftOperandValue: number;
@@ -47,12 +79,23 @@ export class Rule {
     private rightOperandValue: number;
 
     // Operator [...X..]
-    private static readonly OPERATOR = 'MN><=!';
+    private static readonly OPERATOR: string = 'MN><=!';
     private operator: string;
 
     // Action [.....X]
-    static readonly ACTION = 'ABCDEFGHIJKLMNOoPVRwxyzWXYZ';
-    static readonly ACTION_COLOR = 'VABCDEFGH';
+    private static readonly ACTION: string = 'ABCDEFGHIJKLMNOoPVRwxyzWXYZ';
+    private static readonly ACTION_COLOR: string = 'VABCDEFGH';
+    private static readonly ACTION_MARK: string = '>WXYZ';
+    private static readonly ACTION_RESET_MARK: string = '>wxyz';
+    private static readonly ACTION_OTHER: string = 'IJKLMNOoPR';
+    private static readonly ACTION_OTHER_TYPE: Array<ActionType> = [
+        ActionType.NextColor, ActionType.PreviousColor, ActionType.CycleNextColor,
+        ActionType.CyclePreviousColor, ActionType.CycleNextNotEmpty, 
+        ActionType.CyclePreviousNotEmpty, ActionType.CancelChange, 
+        ActionType.EraseMarks, ActionType.FillMost, ActionType.Random    
+    ];
+
+
 
     private actionType: ActionType;
     private actionValue: number;
@@ -84,7 +127,20 @@ export class Rule {
                 this.targetType = TargetType.NotColor;
                 this.targetValue = idx;
             } else {
-                // TODO : Continuer
+                idx = Rule.TARGET_MARKED.indexOf(this.rule[1]);
+                if (idx > -1) {
+                    this.targetType = TargetType.Marked;
+                    this.targetValue = (1 << idx);
+                } else {
+                    idx = Rule.TARGET_NOT_MARKED.indexOf(this.rule[1]);
+                    if (idx > -1) {
+                        this.targetType = TargetType.NotMarked;
+                        this.targetValue = (1 << idx);
+                    } else {
+                        this.targetType = TargetType.Any;
+                        // this.targetValue undefined
+                    }    
+                }
             }
         }
 
@@ -107,7 +163,9 @@ export class Rule {
                     this.leftOperandType = OperandType.NotColor;
                     this.leftOperandValue = idx;    
                 } else {
-                    // TODO : Continuer
+                    idx = Rule.OPERAND_OTHER.indexOf(this.rule[2]);
+                    this.leftOperandType = Rule.OPERAND_OTHER_TYPE[idx];
+                    // this.leftOperandValue undefined
                 }
             }
         }
@@ -137,7 +195,9 @@ export class Rule {
                     this.rightOperandType = OperandType.NotColor;
                     this.rightOperandValue = idx;    
                 } else {
-                    // TODO : Continuer
+                    idx = Rule.OPERAND_OTHER.indexOf(this.rule[4]);
+                    this.leftOperandType = Rule.OPERAND_OTHER_TYPE[idx];
+                    // this.rightOperandValue undefined
                 }
             }
         }
@@ -151,7 +211,21 @@ export class Rule {
             this.actionType = ActionType.Color;
             this.actionValue = idx;
         } else {
-            // TODO : Continuer
+            idx = Rule.ACTION_MARK.indexOf(this.rule[5]);
+            if (idx > -1) {
+                this.actionType = ActionType.Mark;
+                this.actionValue = idx;
+            } else {
+                idx = Rule.ACTION_RESET_MARK.indexOf(this.rule[5]);
+                if (idx > -1) {
+                    this.actionType = ActionType.ResetMark;
+                    this.actionValue = idx;
+                } else {
+                    idx = Rule.ACTION_OTHER.indexOf(this.rule[5]);
+                    this.actionType = Rule.ACTION_OTHER_TYPE[idx];
+                    // this.actionValue undefined
+                }    
+            }
         }
     }
 
@@ -159,48 +233,125 @@ export class Rule {
         throw new Error(message);
     }
 
-    public eval = (x: number, y: number, grid: Array<Array<number>>): number => {
+
+    private evalOperand(x: number, y: number, grid: Array<Array<number>>, 
+        type: OperandType, value: number, ref: number): number {
+
+        let op: number = 0;
+
+        switch (type) {
+            case OperandType.Numeric:
+                op = value;
+            break;
+            case OperandType.Color:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) == value) op++;
+                });
+            break;
+            case OperandType.NotColor:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) > 0
+                        && this.getCell(x + coords[0], y + coords[1], grid) != value) op++;
+                });
+            break;
+            case OperandType.SameColor:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) == ref) op++;
+                });
+            break;
+            case OperandType.DifferentColor:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) > 0
+                        && this.getCell(x + coords[0], y + coords[1], grid) != ref) op++;
+                });
+            break;
+            case OperandType.CountColors:
+                let colors: Array<boolean> = [true, false, false, false, false, false, false, false, false];
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (!colors[this.getCell(x + coords[0], y + coords[1], grid)]) {
+                        colors[this.getCell(x + coords[0], y + coords[1], grid)] = true;
+                        op++;
+                    }
+                });
+            break;
+            case OperandType.Color12:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) == 1
+                        || this.getCell(x + coords[0], y + coords[1], grid) == 2) op++;
+                });
+            break;
+            case OperandType.Color34:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) == 3
+                        || this.getCell(x + coords[0], y + coords[1], grid) == 4) op++;
+                });
+            break;
+            case OperandType.Color13:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) == 1
+                        || this.getCell(x + coords[0], y + coords[1], grid) == 3) op++;
+                });
+            break;
+            case OperandType.Color23:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) == 2
+                        || this.getCell(x + coords[0], y + coords[1], grid) == 3) op++;
+                });
+            break;
+            case OperandType.Color123:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) >= 1
+                        && this.getCell(x + coords[0], y + coords[1], grid) <= 3) op++;
+                });
+            break;
+            case OperandType.Color1234:
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    if (this.getCell(x + coords[0], y + coords[1], grid) >= 1
+                        && this.getCell(x + coords[0], y + coords[1], grid) <= 4) op++;
+                });
+            break;
+        }
+
+        return op;
+    }
+
+
+    public eval = (x: number, y: number, grid: Array<Array<number>>, maxColor: number): number => {
+
+        let value: number = grid[x][y] & 0xF;
+        let mark: number = (grid[x][y] >> 4);
+
         // Check target cell
         switch (this.targetType) {
             case TargetType.Color:
-                if (grid[x][y] != this.targetValue) {
+                if (value != this.targetValue) {
                     return -1;
                 }
             break;
             case TargetType.NotColor:
-                if (grid[x][y] == 0 || grid[x][y] == this.targetValue) {
+                if (value == 0 || value == this.targetValue) {
                     return -1;
                 }        
+            break;
+            case TargetType.Any:
+                // Any cell => No filter
+            break;
+            case TargetType.Marked:
+                if ((mark && this.targetValue) == 0) {
+                    return -1;
+                }
+            break;
+            case TargetType.NotMarked:
+                if ((mark && this.targetValue) > 0) {
+                    return -1;
+                }
             break;
         }
 
         // Left operand
-        let op1: number;
-        switch (this.leftOperandType) {
-            case OperandType.Numeric:
-                op1 = this.leftOperandValue;
-            break;
-            case OperandType.Color:
-                op1 = 0;
-                this.neighborsGrid.forEach((coords: Array<number>): void => {
-                    if (this.getCell(x + coords[0], y + coords[1], grid) == this.leftOperandValue) op1++;
-                })
-            break;
-        }
-
+        let op1: number = this.evalOperand(x, y, grid, this.leftOperandType, this.leftOperandValue, value);
         // Right operand
-        let op2: number;
-        switch (this.rightOperandType) {
-            case OperandType.Numeric:
-                op2 = this.rightOperandValue;
-            break;
-            case OperandType.Color:
-                op2 = 0;
-                this.neighborsGrid.forEach((coords: Array<number>): void => {
-                    if (this.getCell(x + coords[0], y + coords[1], grid) == this.rightOperandValue) op2++;
-                })
-            break;
-        }
+        let op2: number = this.evalOperand(x, y, grid, this.rightOperandType, this.rightOperandValue, value);
 
         // Operation
         switch (this.operator) {
@@ -225,12 +376,72 @@ export class Rule {
         }
 
         // Action
+        let returnValue: number = value;
+        let returnMark: number = mark;
+
         switch (this.actionType) {
             case ActionType.Color:
-                return this.actionValue;
+                returnValue = this.actionValue;
+            break;
+            case ActionType.Mark:
+                returnMark |= (1 << this.actionValue);
+            break;
+            case ActionType.ResetMark:
+                if ((returnMark & (1 << this.actionValue)) > 0) {
+                    returnMark ^= (1 << this.actionValue);
+                }
+            break;
+            case ActionType.NextColor:
+                returnValue = Math.min(maxColor, returnValue + 1);
+            break;
+            case ActionType.PreviousColor:
+            returnValue = Math.max(0, returnValue - 1);
+            break;
+            case ActionType.CycleNextColor:
+                returnValue = (returnValue + 1) % maxColor;
+            break;
+            case ActionType.CyclePreviousColor:
+                returnValue--;
+                if (returnValue < 0) returnValue = maxColor;
+            break;
+            case ActionType.CycleNextNotEmpty:
+                returnValue++;
+                if (returnValue > maxColor) returnValue = 1;
+            break;
+            case ActionType.CyclePreviousNotEmpty:
+                returnValue--;
+                if (returnValue < 1) returnValue = maxColor;
+            break;
+            case ActionType.CancelChange:
+                // Force value of precedent gen => nothing more to set
+            break;
+            case ActionType.EraseMarks:
+                returnMark = 0;
+            break;
+            case ActionType.FillMost:
+                let colors: Array<number> = [-10, 0, 0, 0, 0, 0, 0, 0, 0];
+                this.neighborsGrid.forEach((coords: Array<number>): void => {
+                    colors[this.getCell(x + coords[0], y + coords[1], grid)]++;
+                });
+
+                let max: number = -1;
+                colors.forEach((count: number, idx: number): void => {
+                    if (count > max) {
+                        max = count;
+                        returnValue = idx;
+                    }
+                })
+
+                if (max == -1) {
+                    return -3; // No cell (or no neighbor to check)
+                }
+            break;
+            case ActionType.Random:
+                returnValue = Math.floor(Math.random() * maxColor) + 1
+            break;
         }
 
-        return -3;
+        return returnValue + (returnMark << 4);
     }
 
 
@@ -240,7 +451,7 @@ export class Rule {
         while (y < 0) y += grid[0].length;
         if (y >= grid[0].length) y %= grid[0].length;
 
-        return grid[x][y];
+        return grid[x][y] & 15;
     }
 
 

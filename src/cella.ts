@@ -11,7 +11,9 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     public static readonly MAX_DISTANCE_MOVE = 5;
 
-    images: Array<string> = ['images/menu.png', 'images/menu_pause.png', 'images/menu_gen.png'];
+    images: Array<string> = [
+        'images/menu.png', 'images/menu_pause.png', 
+        'images/menu_gen.png', 'images/edit_mode.png'];
 
     private gridSprite: GridSprite;
     private menuSprite: MenuSprite;
@@ -63,7 +65,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
         engine.addSprite(this.gridSprite);
 
         this.color = 1; // Default color
-        this.colorsAvailable = 1; // TODO : Change in editor
+        this.colorsAvailable = 2; // TODO : Change in editor
         this.colorPicker = new ColorPickerSprite(this.colorsAvailable);
 
         this.menuSprite = new MenuSprite(
@@ -93,8 +95,9 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             );
         }
 
-        let rules: Array<string> = ['8AA<2V', '8AA>3V', '8VA=3A'];
-        let message: Types.Message = new Types.Message(Types.WorkerCommand.Init, this.grid, rules);
+        //let rules: Array<string> = ['8AA<2V', '8AA>3V', '8VA=3A'];
+        let rules: Array<string> = ['8PL<2V', '8PL>3V', '8VL=3P'];
+        let message: Types.Message = new Types.Message(Types.WorkerCommand.Init, this.grid, rules, this.colorsAvailable);
         this.worker.postMessage(message);
     }
 

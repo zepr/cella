@@ -40,6 +40,11 @@ Les fichiers générés (répertoire ```/dist```) sont directement exploitables 
 
 ## Changelog
 
+### 0.0.4 - 2018.09.16
+
+- Implémentation de l'ensemble des règles de la version initiale
+- Changement des règles en dur : Version du jeu de la vie avec 2 couleurs (Les nouvelles cellules prennent la couleur majoritaire de leurs voisines)
+
 ### 0.0.3 - 2018.09.02
 
 - Mode edition

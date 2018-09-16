@@ -12,6 +12,7 @@ export enum WorkerCommand {
 export class Message {
     constructor(public command: WorkerCommand,
         public grid?: Array<Array<number>>,
-        public rules?: Array<string>) {
+        public rules?: Array<string>,
+        public colors?: number) {
     }
 }

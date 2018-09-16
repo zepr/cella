@@ -13,7 +13,7 @@ ctx.addEventListener('message', (event) => {
 
     switch (message.command) {
         case Types.WorkerCommand.Init:
-            engine = new Engine(message.grid, message.rules);
+            engine = new Engine(message.grid, message.rules, message.colors);
         break;
         case Types.WorkerCommand.Start:
             engine.updateGrid(message.grid);
