@@ -135,8 +135,8 @@ export class GridSprite extends Zepr.Sprite {
 
     public static readonly COLORS: Array<string> = [
         null, // No value for first index (empty)
-        '#53777A', '#542437', '#C02942', '#D95B43', 
-        '#ECD078', '#B5E86F', '#D827B5', '#1C9CCE'
+        '#53777a', '#542437', '#c02942', '#d95b43', 
+        '#ecd078', '#b5e86f', '#d827b5', '#1c9cce'
     ];
 
     private zoom: number;

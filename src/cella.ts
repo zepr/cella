@@ -5,10 +5,13 @@ import Types = require('./types');
 
 import { Engine } from './engine';
 import { GridSprite, MenuSprite, ColorPickerSprite } from './view';
+import { CellaLoaderScreen } from './loader';
 
 class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListener, Zepr.ZoomListener {
 
     public static readonly MAX_DISTANCE_MOVE = 5;
+
+    images: Array<string> = ['images/menu.png', 'images/menu_pause.png', 'images/menu_gen.png'];
 
     private gridSprite: GridSprite;
     private menuSprite: MenuSprite;
@@ -19,7 +22,6 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     /** Looping through generations */
     private looping: boolean;
-
 
     private clickPosition: Zepr.Point;
     private clickSprites: Array<Zepr.Sprite>;
@@ -46,7 +48,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     init(engine: Zepr.Engine): void {
 
-        engine.setBackgroundColor('#FFFFFF');
+        engine.setBackgroundColor('#ffffff');
 
         engine.enableMouseControl(true);
         engine.enableMouseDrag();
@@ -302,7 +304,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
 
 window.onload = () => {
-    let engine = new Zepr.Engine(512, 512);
+    let engine = new Zepr.Engine(512, 512, new CellaLoaderScreen());
     engine.addScreen('main', new GridScreen());
     engine.start('main');
 };
