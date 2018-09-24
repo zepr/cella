@@ -7,6 +7,8 @@ import { Engine } from './engine';
 import { GridSprite, MenuSprite, ColorPickerSprite } from './view';
 import { CellaLoaderScreen } from './loader';
 
+import { Export } from './export';
+
 class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListener, Zepr.ZoomListener {
 
     public static readonly MAX_DISTANCE_MOVE = 5;
@@ -45,6 +47,10 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
     private colorPicker: ColorPickerSprite;
     /** Check if color picker is visible */
     private isColorPickerVisible: boolean;
+
+    /** Rules */
+    private rules: Array<string>;
+
 
     // TODO => Separer constructeur / init
 
@@ -95,9 +101,9 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             );
         }
 
-        //let rules: Array<string> = ['8AA<2V', '8AA>3V', '8VA=3A'];
-        let rules: Array<string> = ['8PL<2V', '8PL>3V', '8VL=3P'];
-        let message: Types.Message = new Types.Message(Types.WorkerCommand.Init, this.grid, rules, this.colorsAvailable);
+        //let rules: Array<string> = ['8AA<2V', '8AA>3V', '8VA=3A']; 
+        this.rules = ['8PL<2V', '8PL>3V', '8VL=3P'];
+        let message: Types.Message = new Types.Message(Types.WorkerCommand.Init, this.grid, this.rules, this.colorsAvailable);
         this.worker.postMessage(message);
     }
 
@@ -303,6 +309,35 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             } 
         }
     }
+
+
+
+
+    private export(): void {
+        let exportData: any = new Object();
+
+        // Grid
+        let gridRect: Zepr.Rectangle = Export.getAreaOfInterest(this.grid);
+        exportData.gridWidth = gridRect.width;
+        exportData.gridHeight = gridRect.height;
+        exportData.gridX = gridRect.x;
+        exportData.gridY = gridRect.y;
+        exportData.grid = Export.encodeGrid(this.grid, gridRect);
+        
+        // Rules
+        exportData.colors = this.colorsAvailable;
+        exportData.rules = this.rules;
+
+        // Scene
+        exportData.zoom = this.gridSprite.getZoom();
+        let origin: Zepr.Vector = this.gridSprite.getOrigin();
+        exportData.x = origin.x;
+        exportData.y = origin.y;
+
+
+        console.log(JSON.stringify(exportData));
+    }
+
 }
 
 

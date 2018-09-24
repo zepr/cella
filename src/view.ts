@@ -167,9 +167,17 @@ export class GridSprite extends Zepr.Sprite {
         this.needUpdate = true;
     }
 
+    public getZoom = (): number => {
+        return this.zoom;
+    }
+
     public setZoom = (newZoom: number): void => {
         this.nextZoom = newZoom;
         this.needUpdate = true;
+    }
+
+    public getOrigin = (): Zepr.Vector => {
+        return new Zepr.Vector(this.origin.x, this.origin.y);
     }
 
     public setGrid = (newGrid: Array<Array<number>>): void => {
