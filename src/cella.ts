@@ -78,11 +78,10 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
                 new Zepr.Rectangle(Export.storeData.gridX, Export.storeData.gridY, Export.storeData.gridWidth, Export.storeData.gridHeight));
             this.gridSprite.setGrid(this.grid);
 
-            // Change origin
-            let delta: Zepr.Vector = this.gridSprite.getOrigin().multiply(-1).add(Export.storeData.x, Export.storeData.y);            
-            this.gridSprite.drag(delta);
-
+            // Change origin and zoom
+            this.gridSprite.reset(Export.storeData.x, Export.storeData.y, Export.storeData.zoom);
             engine.setZoom(Export.storeData.zoom);
+
             this.colorsAvailable = Export.storeData.colors;
             this.rules = Export.storeData.rules;
 

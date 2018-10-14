@@ -180,6 +180,13 @@ export class GridSprite extends Zepr.Sprite {
         return new Zepr.Vector(this.origin.x, this.origin.y);
     }
 
+    public reset = (x: number, y: number, z: number): void => {
+        this.origin.set(x, y);
+        this.zoom = z;
+        this.nextZoom = z;
+        this.needUpdate = true;
+    }
+
     public setGrid = (newGrid: Array<Array<number>>): void => {
         this.nextGrid = newGrid;
         this.needUpdate = true;
