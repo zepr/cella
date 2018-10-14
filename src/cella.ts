@@ -6,8 +6,9 @@ import Types = require('./types');
 import { Engine } from './engine';
 import { GridSprite, MenuSprite, ColorPickerSprite } from './view';
 import { CellaLoaderScreen } from './loader';
+import { LoadScreen } from './loadstore';
 
-import { Export } from './export';
+import { Export, StoreData } from './export';
 
 class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListener, Zepr.ZoomListener {
 
@@ -51,9 +52,6 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
     /** Rules */
     private rules: Array<string>;
 
-
-    // TODO => Separer constructeur / init
-
     init(engine: Zepr.Engine): void {
 
         engine.setBackgroundColor('#ffffff');
@@ -62,16 +60,42 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
         engine.enableMouseDrag();
         engine.enableZoomControl(1, 40);
         
-        engine.setZoom(6);
-
-        this.grid = Engine.getEmptyGrid(512, 512);
         this.looping = false;
 
-        this.gridSprite = new GridSprite(this.grid);
-        engine.addSprite(this.gridSprite);
+        if (this.grid == null) { // First load
+
+            this.grid = Engine.getEmptyGrid(512, 512);
+            this.gridSprite = new GridSprite(this.grid);
+
+            // Set default values
+            engine.setZoom(6);
+            this.colorsAvailable = 2;            
+            this.rules = ['8PL<2V', '8PL>3V', '8VL=3P'];            
+        
+        } else if (Export.storeData) { // Load game
+
+            this.grid = Export.decodeGrid(Export.storeData.grid, 
+                new Zepr.Rectangle(Export.storeData.gridX, Export.storeData.gridY, Export.storeData.gridWidth, Export.storeData.gridHeight));
+            this.gridSprite.setGrid(this.grid);
+
+            // Change origin
+            let delta: Zepr.Vector = this.gridSprite.getOrigin().multiply(-1).add(Export.storeData.x, Export.storeData.y);            
+            this.gridSprite.drag(delta);
+
+            engine.setZoom(Export.storeData.zoom);
+            this.colorsAvailable = Export.storeData.colors;
+            this.rules = Export.storeData.rules;
+
+            Export.storeData = null; // Reset
+
+        } else { // Back to screen (no modification)
+            engine.setZoom(this.gridSprite.getZoom());
+        }
 
         this.color = 1; // Default color
-        this.colorsAvailable = 2; // TODO : Change in editor
+
+        engine.addSprite(this.gridSprite);
+
         this.colorPicker = new ColorPickerSprite(this.colorsAvailable);
 
         this.menuSprite = new MenuSprite(
@@ -101,8 +125,6 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             );
         }
 
-        //let rules: Array<string> = ['8AA<2V', '8AA>3V', '8VA=3A']; 
-        this.rules = ['8PL<2V', '8PL>3V', '8VL=3P'];
         let message: Types.Message = new Types.Message(Types.WorkerCommand.Init, this.grid, this.rules, this.colorsAvailable);
         this.worker.postMessage(message);
     }
@@ -300,6 +322,16 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
                 break;
                 case 3:
                     // Load/Save
+
+                    // Stop loop
+                    if (this.looping) {
+                        this.worker.postMessage(new Types.Message(Types.WorkerCommand.Stop));
+                        this.menuSprite.setLooping(false);
+                        this.looping = false;
+                    }
+
+                    // Call load screen
+                    engine.start('load');
                 break;
                 case 4:
                     // Rule editor
@@ -308,10 +340,9 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
                     // WTF?
             } 
         }
+
+        this.clickPosition = null;
     }
-
-
-
 
     private export(): void {
         let exportData: any = new Object();
@@ -344,5 +375,6 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 window.onload = () => {
     let engine = new Zepr.Engine(512, 512, new CellaLoaderScreen());
     engine.addScreen('main', new GridScreen());
+    engine.addScreen('load', new LoadScreen());
     engine.start('main');
 };

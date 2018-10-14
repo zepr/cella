@@ -1,0 +1,6 @@
+{
+    "lastUpdate": "2018.09.30",
+    "data": [
+        { "name": "Pentadecathlon vs Gun", "store": "pentagun", "ruleset": "Jeu de la vie (2 couleurs)", "desc": "Un pentadecathlon absorbe les gliders tirés par un gun"}
+    ]
+}

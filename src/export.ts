@@ -2,11 +2,38 @@ import Zepr = require('zepr.ts');
 
 import { Engine } from './engine';
 
+/**
+ * Structure used to store a whole game
+ */
+export interface StoreData {
+    // Grid
+    gridWidth: number;
+    gridHeight: number;
+    gridX: number;
+    gridY: number;
+    grid: string;
+
+    // Rules
+    colors: number;
+    rules: Array<string>;
+
+    // Scene
+    zoom: number;
+    x: number;
+    y: number;
+}
+
+
+
+
+
 export class Export {
 
-    public static readonly BASE64: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
     private constructor() {}
+
+
+    /** Scene to load */
+    public static storeData: StoreData;
 
 
     /**

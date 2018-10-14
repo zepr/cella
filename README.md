@@ -40,6 +40,11 @@ Les fichiers générés (répertoire ```/dist```) sont directement exploitables 
 
 ## Changelog
 
+### 0.0.5 - 2018.10.14
+
+- Fonction basique d'import
+- Une scène de test (Pentadecathlon + Gliders + Gun)
+
 ### 0.0.4 - 2018.09.16
 
 - Implémentation de l'ensemble des règles de la version initiale
