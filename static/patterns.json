@@ -1,6 +1,8 @@
 {
     "lastUpdate": "2018.09.30",
     "data": [
-        { "name": "Pentadecathlon vs Gun", "store": "pentagun", "ruleset": "Jeu de la vie (2 couleurs)", "desc": "Un pentadecathlon absorbe les gliders tirés par un gun"}
+        { "name": "Mario clone", "store": "mario", "ruleset": "Réplicateur d'Edward Fredkin (Circa 1960)", "desc": "Une image de Mario utilisée dans un réplicateur. Source de l'image: http://pixelartmaker.com/art/dfa4ae756f36e74"},
+        { "name": "Oscillateurs", "store": "oscillators", "ruleset": "Jeu de la vie (4 couleurs)", "desc": "Quelques exemples d'oscillateurs"},
+        { "name": "Pentadecathlon vs Gun", "store": "pentagun", "ruleset": "Jeu de la vie (2 couleurs)", "desc": "Un pentadecathlon absorbe les Gliders tirés par un Gun"}
     ]
 }
