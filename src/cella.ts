@@ -157,6 +157,8 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             return;
         }
 
+        if (this.clickPosition) return; // Avoid failed double-click
+
         this.clickPosition = point;
         this.clickSprites = sprites;
         this.clickMove = new Zepr.Vector();
@@ -169,8 +171,6 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
                 return true;
             } 
         });
-
-        if (this.clickPosition) return; // Avoid failed double-click
 
         // Check for editMode
         if (this.menuPosition == -1 && !this.menuSprite.isRunning()) {
