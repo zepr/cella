@@ -170,6 +170,8 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             } 
         });
 
+        if (this.clickPosition) return; // Avoid failed double-click
+
         // Check for editMode
         if (this.menuPosition == -1 && !this.menuSprite.isRunning()) {
             this.editTimout = setTimeout(this.onEdit, 200, this, engine);
