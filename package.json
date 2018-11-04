@@ -1,6 +1,6 @@
 {
   "name": "cella",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Un automate cellulaire programmable",
   "main": "index.html",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "Glenn Sanson",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "browser-sync": "^2.24.7",
+    "browser-sync": "^2.26.3",
     "browser-sync-webpack-plugin": "^2.2.2",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.1",
@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "npm": "^6.4.1",
-    "zepr.ts": "0.0.9"
+    "zepr.ts": "0.1.3"
   }
 }

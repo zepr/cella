@@ -212,7 +212,7 @@ export class GridSprite extends Zepr.Sprite {
     }
 
     public drag = (delta: Zepr.Vector): void => {
-        this.origin.addVector(delta);
+        this.origin.add(delta);
         this.needUpdate = true;
     }
 

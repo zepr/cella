@@ -230,7 +230,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             }
 
         } else if (this.clickPosition) {
-            this.clickMove.addVector(move);
+            this.clickMove.add(move);
             if (this.clickMove.getMagnitude() > GridScreen.MAX_DISTANCE_MOVE) {
 
                 // Disable edit mode if not yet enabled
