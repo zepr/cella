@@ -3,7 +3,7 @@ import Zepr = require('zepr.ts');
 
 
 
-export class ColorPickerSprite extends Zepr.Sprite {
+export class ColorPickerSprite extends Zepr.RawSprite<Zepr.Rectangle> {
 
     /** Canvas used for off-screen rendering (double buffering) */
     private offCanvas: HTMLCanvasElement;
@@ -71,12 +71,12 @@ export class ColorPickerSprite extends Zepr.Sprite {
 
 
     render(context: CanvasRenderingContext2D): void {
-        context.drawImage(this.offCanvas, this.rect.x, this.rect.y);
+        context.drawImage(this.offCanvas, this.shape.x, this.shape.y);
     }
 }
 
 
-export class MenuSprite extends Zepr.Sprite {
+export class MenuSprite extends Zepr.RawSprite<Zepr.Rectangle> {
 
     /** Continuous generation */
     private loop: boolean;
@@ -92,17 +92,17 @@ export class MenuSprite extends Zepr.Sprite {
     }
 
     render(context: CanvasRenderingContext2D): void {
-        context.drawImage(this.menuImage, this.rect.x, this.rect.y);
+        context.drawImage(this.menuImage, this.shape.x, this.shape.y);
         if (this.loop) {
-            context.drawImage(this.menuPause, this.rect.x, this.rect.y);
+            context.drawImage(this.menuPause, this.shape.x, this.shape.y);
         }
         if (this.run) {
-            context.drawImage(this.menuGen, this.rect.x, this.rect.y + 48);
+            context.drawImage(this.menuGen, this.shape.x, this.shape.y + 48);
         }
 
         // Color
         context.beginPath();
-        context.arc(this.rect.x + 35, this.rect.y + 131, 6, 0, 2*Math.PI);
+        context.arc(this.shape.x + 35, this.shape.y + 131, 6, 0, 2*Math.PI);
         if (this.color) {
             context.fillStyle = GridSprite.COLORS[this.color];
             context.fill();
@@ -131,7 +131,7 @@ export class MenuSprite extends Zepr.Sprite {
 }
 
 
-export class GridSprite extends Zepr.Sprite {
+export class GridSprite extends Zepr.RawSprite<Zepr.Rectangle> {
 
     public static readonly COLORS: Array<string> = [
         null, // No value for first index (empty)

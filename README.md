@@ -40,6 +40,11 @@ Les fichiers générés (répertoire ```/dist```) sont directement exploitables 
 
 ## Changelog
 
+### 0.0.6 - 2018.11.25
+
+- Deux autres scènes de test
+- Passage à `zepr.ts@0.1.5`
+
 ### 0.0.5 - 2018.10.14
 
 - Fonction basique d'import

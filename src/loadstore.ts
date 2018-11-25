@@ -16,7 +16,7 @@ interface Patterns {
 }
 
 
-class TextSprite extends Zepr.Sprite {
+class TextSprite extends Zepr.RawSprite<Zepr.Rectangle> {
 
     /** Canvas used for off-screen rendering (double buffering) */
     private offCanvas: HTMLCanvasElement;
@@ -52,24 +52,24 @@ class TextSprite extends Zepr.Sprite {
         this.text = text;
 
         if (text == null) {
-            this.offCtx.clearRect(0, 0, this.rect.width, this.rect.height);
+            this.offCtx.clearRect(0, 0, this.shape.width, this.shape.height);
             return;
         }
 
         let zText: Zepr.Text;
         if (reverse == null) {
-            this.offCtx.clearRect(0, 0, this.rect.width, this.rect.height);
+            this.offCtx.clearRect(0, 0, this.shape.width, this.shape.height);
 
             if (this.border) {
                 this.offCtx.strokeStyle = this.font.color;
-                this.offCtx.strokeRect(0, 0, this.rect.width, this.rect.height);
+                this.offCtx.strokeRect(0, 0, this.shape.width, this.shape.height);
             }
 
-            zText = new Zepr.Text(text, new Zepr.Point(10, 0), this.rect.width - 20, this.font, this.align);
+            zText = new Zepr.Text(text, new Zepr.Point(10, 0), this.shape.width - 20, this.font, this.align);
         } else {
             this.offCtx.fillStyle = this.font.color;
-            this.offCtx.fillRect(0, 0, this.rect.width, this.rect.height);
-            zText = new Zepr.Text(text, new Zepr.Point(10, 0), this.rect.width - 20, new Zepr.Font(this.font.face, this.font.size, reverse), this.align);
+            this.offCtx.fillRect(0, 0, this.shape.width, this.shape.height);
+            zText = new Zepr.Text(text, new Zepr.Point(10, 0), this.shape.width - 20, new Zepr.Font(this.font.face, this.font.size, reverse), this.align);
         }
         
         zText.render(this.offCtx);
@@ -80,7 +80,7 @@ class TextSprite extends Zepr.Sprite {
     }
 
     public render(context: CanvasRenderingContext2D): void {
-        context.drawImage(this.offCanvas, this.rect.x, this.rect.y);
+        context.drawImage(this.offCanvas, this.shape.x, this.shape.y);
     }
 
 }
@@ -190,7 +190,7 @@ export class LoadScreen implements Zepr.GameScreen, Zepr.ClickListener {
     run(engine: Zepr.Engine): void {
     }
 
-    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Zepr.Sprite[]): void {
+    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Zepr.RawSprite<any>[]): void {
 
         if (this.loading) return; // No action if loading
 

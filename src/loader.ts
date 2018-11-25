@@ -19,7 +19,7 @@ export class CellaLoaderScreen implements Zepr.LoaderScreen {
     }
 }
 
-class LoaderSprite extends Zepr.Sprite {
+class LoaderSprite extends Zepr.RawSprite<Zepr.Rectangle> {
 
     private static readonly PATTERNS: Array<Array<Array<boolean>>> =
     [
@@ -71,15 +71,15 @@ class LoaderSprite extends Zepr.Sprite {
     }
 
     render(context: CanvasRenderingContext2D): void {
-        context.drawImage(this.canvasPatterns[this.canvasIndex][0], this.rect.x, this.rect.y);
-        let height: number = this.rect.height * this.progress;
+        context.drawImage(this.canvasPatterns[this.canvasIndex][0], this.shape.x, this.shape.y);
+        let height: number = this.shape.height * this.progress;
         if (height > 0) {
             context.save();
 
             context.beginPath();
-            context.rect(this.rect.x, this.rect.y + this.rect.height - height, this.rect.width, height);
+            context.rect(this.shape.x, this.shape.y + this.shape.height - height, this.shape.width, height);
             context.clip();
-            context.drawImage(this.canvasPatterns[this.canvasIndex][1], this.rect.x, this.rect.y);
+            context.drawImage(this.canvasPatterns[this.canvasIndex][1], this.shape.x, this.shape.y);
             
             context.restore();
         }

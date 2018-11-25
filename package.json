@@ -1,6 +1,6 @@
 {
   "name": "cella",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Un automate cellulaire programmable",
   "main": "index.html",
   "scripts": {
@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "npm": "^6.4.1",
-    "zepr.ts": "0.1.3"
+    "zepr.ts": "0.1.5"
   }
 }

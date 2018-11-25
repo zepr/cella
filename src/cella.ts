@@ -29,7 +29,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
     private looping: boolean;
 
     private clickPosition: Zepr.Point;
-    private clickSprites: Array<Zepr.Sprite>;
+    private clickSprites: Array<Zepr.Sprite<any>>;
     private clickMove: Zepr.Vector;
     private menuPosition: number;
 
@@ -132,11 +132,11 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     }
 
-    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Array<Zepr.Sprite>): void {
+    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Array<Zepr.Sprite<any>>): void {
 
         // Check for click on colorPicker
         if (this.isColorPickerVisible) {
-            sprites.some((sprite: Zepr.Sprite): boolean => {
+            sprites.some((sprite: Zepr.Sprite<any>): boolean => {
                 if (sprite instanceof ColorPickerSprite) {
                     // Change color
                     let px: number = point.x - this.colorPicker.getX() - 4;
@@ -165,7 +165,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
         // Check for click on menu
         this.menuPosition = -1;
-        this.clickSprites.some((sprite: Zepr.Sprite): boolean => {
+        this.clickSprites.some((sprite: Zepr.Sprite<any>): boolean => {
             if (sprite instanceof MenuSprite) {
                 this.menuPosition = Math.floor((this.clickPosition.y - sprite.getY()) / 48);
                 return true;
