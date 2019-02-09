@@ -74,6 +74,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
         
         } else if (Export.storeData) { // Load game
 
+            // Rectangle coords in export refers to upper-left corner
             this.grid = Export.decodeGrid(Export.storeData.grid, 
                 new Zepr.Rectangle(Export.storeData.gridX, Export.storeData.gridY, Export.storeData.gridWidth, Export.storeData.gridHeight));
             this.gridSprite.setGrid(this.grid);
@@ -107,7 +108,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
         this.editIcon = new Zepr.ImageSprite(
             engine.getImage('images/edit_mode.png'),
-            new Zepr.Point(0, 0), 10
+            Zepr.Rectangle.asRect(0, 0, 24, 24), 10
         );
 
         // Start worker
@@ -139,8 +140,8 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             sprites.some((sprite: Zepr.Sprite<any>): boolean => {
                 if (sprite instanceof ColorPickerSprite) {
                     // Change color
-                    let px: number = point.x - this.colorPicker.getX() - 4;
-                    let py: number = point.y - this.colorPicker.getY() - 4;
+                    let px: number = point.x - this.colorPicker.getX() + 45;
+                    let py: number = point.y - this.colorPicker.getY() + 45;
                     if (px >= 0 && px < 90 && py >= 0 && py < 90) {
                         // Color selected
                         let newColor: number = Math.floor(py / 30) * 3 + Math.floor(px / 30);
@@ -167,7 +168,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
         this.menuPosition = -1;
         this.clickSprites.some((sprite: Zepr.Sprite<any>): boolean => {
             if (sprite instanceof MenuSprite) {
-                this.menuPosition = Math.floor((this.clickPosition.y - sprite.getY()) / 48);
+                this.menuPosition = Math.floor((this.clickPosition.y - sprite.getY() + 120) / 48);
                 return true;
             } 
         });
@@ -303,15 +304,15 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
                         this.menuSprite.setColor(this.color);
                     } else {
                         // Set position of colorPicker
-                        let y: number = Math.max(20, Math.min(394, this.menuSprite.getY() + 71));
-                        let x: number;                        
+                        let y: number = Math.max(69, Math.min(443, this.menuSprite.getY()));
+                        let x: number;     
 
                         if (this.menuSprite.getX() >= 256) {
                             // Show left
-                            x = this.menuSprite.getX() - 118;
+                            x = this.menuSprite.getX() - 83;
                         } else {
                             // Show right
-                            x = this.menuSprite.getX() + 68;
+                            x = this.menuSprite.getX() + 83;
                         }
 
                         this.colorPicker.moveTo(x, y);

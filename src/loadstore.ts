@@ -80,7 +80,7 @@ class TextSprite extends Zepr.RawSprite<Zepr.Rectangle> {
     }
 
     public render(context: CanvasRenderingContext2D): void {
-        context.drawImage(this.offCanvas, this.shape.x, this.shape.y);
+        context.drawImage(this.offCanvas, this.shape.x - this.shape.width / 2, this.shape.y - this.shape.height / 2);
     }
 
 }
@@ -118,21 +118,21 @@ export class LoadScreen implements Zepr.GameScreen, Zepr.ClickListener {
         this.menuIndex = 0;
 
         // Create controls
-        this.controlAbort = new TextSprite('X', new Zepr.Rectangle(454, 9, 36, 18), this.font, Zepr.TextAlign.CENTER, true)
-        this.controlValidate = new TextSprite('OK', new Zepr.Rectangle(444, 469, 56, 18), this.font, Zepr.TextAlign.CENTER, true)
+        this.controlAbort = new TextSprite('X', new Zepr.Rectangle(472, 18, 36, 18), this.font, Zepr.TextAlign.CENTER, true)
+        this.controlValidate = new TextSprite('OK', new Zepr.Rectangle(472, 478, 56, 18), this.font, Zepr.TextAlign.CENTER, true)
 
         // Create items
         this.items = new Array<TextSprite>();
         for (let i = 0; i < 9; i++) {
-            this.items.push(new TextSprite(null, new Zepr.Rectangle(20, 60 + i * 20, 472, 20), this.font, Zepr.TextAlign.LEFT));
+            this.items.push(new TextSprite(null, new Zepr.Rectangle(256, 70 + i * 20, 472, 20), this.font, Zepr.TextAlign.LEFT));
         }
 
         Zepr.Net.get('patterns.json', (message: any): void => {
             this.patterns = <Patterns>message;
         });
 
-        this.ruleset = new TextSprite(null, new Zepr.Rectangle(50, 250, 412, 31), this.font, Zepr.TextAlign.JUSTIFY);
-        this.desc = new TextSprite(null, new Zepr.Rectangle(50, 292, 412, 157), this.font, Zepr.TextAlign.JUSTIFY);
+        this.ruleset = new TextSprite(null, new Zepr.Rectangle(256, 266, 412, 31), this.font, Zepr.TextAlign.JUSTIFY);
+        this.desc = new TextSprite(null, new Zepr.Rectangle(256, 370, 412, 157), this.font, Zepr.TextAlign.JUSTIFY);
     }
 
     // TODO : Controle que les patterns sont chargés
@@ -142,7 +142,7 @@ export class LoadScreen implements Zepr.GameScreen, Zepr.ClickListener {
         engine.enableMouseControl(true);
 
         // Header
-        engine.addSprite(new TextSprite('>>> SELECTION <<<', new Zepr.Rectangle(100, 9, 312, 20), this.font, Zepr.TextAlign.CENTER));
+        engine.addSprite(new TextSprite('>>> SELECTION <<<', new Zepr.Rectangle(256, 19, 312, 20), this.font, Zepr.TextAlign.CENTER));
 
         // Controls
         engine.addSprite(this.controlAbort);

@@ -26,7 +26,10 @@ export interface StoreData {
 
 
 
-
+/**
+ * Class used to manage import/export. 
+ * Grid coords (Rectangle) used in export functions are defined from the upper-left corner.
+ */
 export class Export {
 
     private constructor() {}

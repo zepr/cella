@@ -71,7 +71,7 @@ export class ColorPickerSprite extends Zepr.RawSprite<Zepr.Rectangle> {
 
 
     render(context: CanvasRenderingContext2D): void {
-        context.drawImage(this.offCanvas, this.shape.x, this.shape.y);
+        context.drawImage(this.offCanvas, this.shape.x - 49, this.shape.y - 49);
     }
 }
 
@@ -88,10 +88,14 @@ export class MenuSprite extends Zepr.RawSprite<Zepr.Rectangle> {
         protected menuGen: HTMLImageElement,
         protected color: number) {
         
-        super(new Zepr.Rectangle(416, 136, 48, 240), 1);
+        super(new Zepr.Rectangle(440, 256, 48, 240), 1);
     }
 
     render(context: CanvasRenderingContext2D): void {
+
+        context.save();
+        context.translate(-this.shape.width / 2, -this.shape.height / 2);
+
         context.drawImage(this.menuImage, this.shape.x, this.shape.y);
         if (this.loop) {
             context.drawImage(this.menuPause, this.shape.x, this.shape.y);
@@ -110,6 +114,8 @@ export class MenuSprite extends Zepr.RawSprite<Zepr.Rectangle> {
             context.strokeStyle = '#000000';
             context.stroke();
         }
+
+        context.restore();
     }
 
     setColor(color: number): void {

@@ -40,9 +40,15 @@ Les fichiers générés (répertoire ```/dist```) sont directement exploitables 
 
 ## Changelog
 
+### 0.0.7 - 2019.02.09
+
+Passage à `zepr.ts@0.2.1`
+- Les implémentations de `Sprite` utilisent les coordonnées du centre de l'objet
+- l'export (non graphique) utilise toujours le `Rectangle` en utilisant les coordonnées de son coin supérieur gauche
+
 ### 0.0.6 - 2018.11.25
 
-- Deux autres scènes de test
+- Deux autres scènes de test (Mario clone et Oscillateurs)
 - Passage à `zepr.ts@0.1.5`
 
 ### 0.0.5 - 2018.10.14
