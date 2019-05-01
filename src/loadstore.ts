@@ -190,7 +190,7 @@ export class LoadScreen implements Zepr.GameScreen, Zepr.ClickListener {
     run(engine: Zepr.Engine): void {
     }
 
-    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Zepr.RawSprite<any>[]): void {
+    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Zepr.RawSprite<any>[]): boolean {
 
         if (this.loading) return; // No action if loading
 
@@ -199,7 +199,7 @@ export class LoadScreen implements Zepr.GameScreen, Zepr.ClickListener {
             if (sprites[0] == this.controlAbort) {
                 // Back to main screen
                 engine.start('main');
-                return;
+                return false;
             } 
 
             if (sprites[0] == this.controlValidate && this.select) {
@@ -231,6 +231,8 @@ export class LoadScreen implements Zepr.GameScreen, Zepr.ClickListener {
         }
 
         this.updateItems();
+
+        return true;
     }
 
     /*

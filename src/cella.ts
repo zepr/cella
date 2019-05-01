@@ -133,7 +133,7 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
 
     }
 
-    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Array<Zepr.Sprite<any>>): void {
+    onClick(engine: Zepr.Engine, point: Zepr.Point, sprites: Array<Zepr.Sprite<any>>): boolean {
 
         // Check for click on colorPicker
         if (this.isColorPickerVisible) {
@@ -155,10 +155,10 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
                 }
             });
 
-            return;
+            return true;
         }
 
-        if (this.clickPosition) return; // Avoid failed double-click
+        if (this.clickPosition) return true; // Avoid failed double-click
 
         this.clickPosition = point;
         this.clickSprites = sprites;
@@ -178,6 +178,8 @@ class GridScreen implements Zepr.GameScreen, Zepr.ClickListener, Zepr.DragListen
             this.editTimout = setTimeout(this.onEdit, 200, this, engine);
             this.editPosition = new Zepr.Point(point.x, point.y);
         }
+
+        return true;
     }
 
 

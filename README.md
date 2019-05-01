@@ -40,6 +40,10 @@ Les fichiers générés (répertoire ```/dist```) sont directement exploitables 
 
 ## Changelog
 
+### 0.0.8 - 2019.02.09
+
+Passage à `zepr.ts@0.3.1`
+
 ### 0.0.7 - 2019.02.09
 
 Passage à `zepr.ts@0.2.1`
